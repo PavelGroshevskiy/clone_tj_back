@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { SearchPostDto } from './dto/search-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -26,24 +28,23 @@ export class PostController {
     return this.postService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const find = await this.postService.findOne(+id);
+  @Get('/popular')
+  getPopular() {
+    return this.postService.popular();
+  }
+  @Get('/search')
+  getSearchPost(@Query() dto: SearchPostDto) {
+    return this.postService.search(dto);
+  }
 
-    if (!find) {
-      throw new NotFoundException('Post not found');
-    }
-    return find;
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.postService.findOne(+id);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    const update = await this.postService.update(+id, updatePostDto);
-    console.log(update);
-    if (!update) {
-      throw new NotFoundException('Post not found');
-    }
-    return update;
+  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+    return this.postService.update(+id, updatePostDto);
   }
 
   @Delete(':id')
