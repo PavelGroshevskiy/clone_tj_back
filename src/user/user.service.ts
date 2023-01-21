@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { SearchUserDto } from './dto/search-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
@@ -32,10 +33,34 @@ export class UserService {
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+    return this.userRepository.update(id, updateUserDto);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
+    return this.userRepository.delete(id);
+  }
+
+  async search(dto: SearchUserDto) {
+    const qb = this.userRepository.createQueryBuilder('u');
+    qb.limit(dto.limit || 0);
+    qb.take(dto.take || 10);
+
+    if (dto.email) {
+      qb.andWhere(`u.email ILIKE :email`);
+    }
+    if (dto.fullName) {
+      qb.andWhere(`u.fullName ILIKE :fullName `);
+    }
+
+    qb.setParameters({
+      email: `%${dto.email}%`,
+      fullName: `%${dto.fullName}%`,
+    });
+    const [items, total] = await qb.getManyAndCount();
+
+    return {
+      items,
+      total,
+    };
   }
 }

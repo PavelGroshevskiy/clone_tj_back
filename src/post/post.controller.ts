@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  NotFoundException,
   Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
